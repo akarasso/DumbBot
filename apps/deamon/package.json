@@ -1,0 +1,27 @@
+{
+  "name": "io",
+  "version": "1.0.0",
+  "description": "Deamon",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf ./build && tsc",
+    "start": "npm run build && node build/index.js",
+    "start:dev": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "inversify": "^5.0.1",
+    "iohook": "^0.6.6",
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.10",
+    "nodemon": "^2.0.6",
+    "rimraf": "^3.0.2",
+    "ts-node": "^9.1.0",
+    "typescript": "^4.1.2"
+  }
+}
