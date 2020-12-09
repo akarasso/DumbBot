@@ -1,4 +1,4 @@
 import dotenv from 'dotenv'
-import './autoload'
-
 dotenv.config()
+
+import './autoload'

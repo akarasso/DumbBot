@@ -1,0 +1,3 @@
+export enum GUILDS {
+    TAVERNE = '317763543418011655',
+}

@@ -1,18 +1,22 @@
 import { inject, injectable } from "inversify"
 import "reflect-metadata"
-import { IDENTIFIER } from "../identifiers"
-import { KeyboardHookService } from "../services/keyboard-hook.service"
+import { Logger } from 'winston'
+import KeyboardHookService from "../services/keyboard-hook.service"
+import LoggerService from "../services/logger.service"
 
 @injectable()
-export class DebugShortcut {
-    name = 'DebugShortcut'
+export default class DebugShortcut {
+    private logger: Logger
+
     constructor(
-        @inject(IDENTIFIER.SERVICES.KEYBOARD_HOOK_SERVICE) keyboardHookService: KeyboardHookService,
+        @inject(LoggerService) private readonly loggerService: LoggerService,
+        @inject(KeyboardHookService) private readonly keyboardHookService: KeyboardHookService,
     ) {
-        console.log(keyboardHookService)
+        this.logger = loggerService.get()
+        this.keyboardHookService.registerAction('debug', [45], this.action)
     }
 
-    public debug() {
-        console.log(this.name)
+    private action() {
+
     }
 }

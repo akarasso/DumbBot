@@ -1,10 +1,17 @@
-import { injectable } from "inversify"
+import { inject, injectable } from "inversify"
 import "reflect-metadata"
 import iohook from "iohook"
+import LoggerService from "./logger.service"
+import { Logger } from "winston"
 
 @injectable()
-export class KeyboardHookService {
-    constructor() {
+export default class KeyboardHookService {
+    private logger: Logger
+
+    constructor(
+        @inject(LoggerService) loggerService: LoggerService,
+    ) {
+        this.logger = loggerService.get()
         iohook.start()
     }
 
@@ -14,7 +21,7 @@ export class KeyboardHookService {
         callback: Function,
         releaseCallback?: Function | undefined,
     ) {
-        console.log('Register new action' + name)
+        this.logger.info(`Register action ${ name }`)
         iohook.registerShortcut(
             keys,
             callback,
