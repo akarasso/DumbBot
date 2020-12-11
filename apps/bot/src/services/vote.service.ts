@@ -12,25 +12,25 @@ import { Vote } from './interfaces/vote'
  * @members User allowed to vote
  * @callback Function when enougth member vote pos
  */
-type VoteEntry = {
+export type VoteEntry = {
 	target: number
 	members: string[]
 	callback: () => void
 }
 
-type VoteTable = Record<string, undefined | VoteEntry>
+export type VoteTable = Record<string, undefined | VoteEntry>
 
 @injectable()
 export default class VoteService {
-	private logger: Logger
-	private voteTable: VoteTable = {}
+	public logger: Logger
+	public voteTable: VoteTable = {}
 
 	constructor(
-		@inject(LoggerService) private readonly loggerService: LoggerService,
+		@inject(LoggerService) loggerService: LoggerService,
 		@inject(DiscordJSService)
-		private readonly discordJSService: DiscordJSService,
+		public readonly discordJSService: DiscordJSService,
 	) {
-		this.logger = this.loggerService.get()
+		this.logger = loggerService.get()
 		this.discordJSService.client.on('messageReactionAdd', this.onAddReaction.bind(this))
 	}
 
@@ -48,7 +48,7 @@ export default class VoteService {
 		}
 	}
 
-	private onAddReaction(reaction: MessageReaction, _user: User | PartialUser) {
+	public onAddReaction(reaction: MessageReaction, _user: User | PartialUser) {
 		if (reaction.emoji.name !== '👍') {
 			return
 		}

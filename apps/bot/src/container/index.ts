@@ -15,20 +15,25 @@ import VoteService from '../services/vote.service'
 import MuteAction from '../actions/mute.actions'
 import MuteService from '../services/mute.service'
 
-export const container = new Container()
+export const buildContainer = () => {
+    const container = new Container()
+    container.bind<DiscordJSService>(DiscordJSService).to(DiscordJSService).inSingletonScope()
+    container.bind<MusicPlayerService>(MusicPlayerService).to(MusicPlayerService).inSingletonScope()
+    container.bind<ActionMessageService>(ActionMessageService).to(ActionMessageService).inSingletonScope()
+    container.bind<LoggerService>(LoggerService).to(LoggerService).inSingletonScope()
+    container.bind<VoteService>(VoteService).to(VoteService).inSingletonScope()
+    container.bind<MuteService>(MuteService).to(MuteService).inSingletonScope()
+    
+    container.bind<PauseMusicAction>(PauseMusicAction).to(PauseMusicAction).inSingletonScope()
+    container.bind<PlayMusicAction>(PlayMusicAction).to(PlayMusicAction).inSingletonScope()
+    container.bind<SkipMusicAction>(SkipMusicAction).to(SkipMusicAction).inSingletonScope()
+    container.bind<StopMusicAction>(StopMusicAction).to(StopMusicAction).inSingletonScope()
+    container.bind<UnpauseMusicAction>(UnpauseMusicAction).to(UnpauseMusicAction).inSingletonScope()
+    container.bind<VolumeMusicAction>(VolumeMusicAction).to(VolumeMusicAction).inSingletonScope()
+    container.bind<VoteAction>(VoteAction).to(VoteAction).inSingletonScope()
+    container.bind<MuteAction>(MuteAction).to(MuteAction).inSingletonScope()
 
-container.bind<DiscordJSService>(DiscordJSService).to(DiscordJSService).inSingletonScope()
-container.bind<MusicPlayerService>(MusicPlayerService).to(MusicPlayerService).inSingletonScope()
-container.bind<ActionMessageService>(ActionMessageService).to(ActionMessageService).inSingletonScope()
-container.bind<LoggerService>(LoggerService).to(LoggerService).inSingletonScope()
-container.bind<VoteService>(VoteService).to(VoteService).inSingletonScope()
-container.bind<MuteService>(MuteService).to(MuteService).inSingletonScope()
+    return container
+}
 
-container.bind<PauseMusicAction>(PauseMusicAction).to(PauseMusicAction).inSingletonScope()
-container.bind<PlayMusicAction>(PlayMusicAction).to(PlayMusicAction).inSingletonScope()
-container.bind<SkipMusicAction>(SkipMusicAction).to(SkipMusicAction).inSingletonScope()
-container.bind<StopMusicAction>(StopMusicAction).to(StopMusicAction).inSingletonScope()
-container.bind<UnpauseMusicAction>(UnpauseMusicAction).to(UnpauseMusicAction).inSingletonScope()
-container.bind<VolumeMusicAction>(VolumeMusicAction).to(VolumeMusicAction).inSingletonScope()
-container.bind<VoteAction>(VoteAction).to(VoteAction).inSingletonScope()
-container.bind<MuteAction>(MuteAction).to(MuteAction).inSingletonScope()
+export const container = buildContainer()

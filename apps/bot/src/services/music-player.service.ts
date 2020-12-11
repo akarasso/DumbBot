@@ -25,7 +25,6 @@ export default class MusicPlayerService {
 	}
 
 	public push(channel: VoiceChannel, url: string) {
-		this.logger.debug(`Push sound event to list`, url)
 		this.queue.push({
 			channel,
 			url,
@@ -55,7 +54,11 @@ export default class MusicPlayerService {
 		await this.discordJSService.joinVoiceChannel(event.channel)
 		if (this.discordJSService.voiceConnection) {
 			if (/youtube/.test(event.url)) {
-				this.dispatcher = this.discordJSService.voiceConnection.play(ytdl(event.url), {
+				if (!ytdl.validateURL(event.url)) {
+					console.error('Failed to validate URL')
+				}
+				const stream = ytdl(event.url, { filter: format => format.container === 'mp4' })
+				this.dispatcher = this.discordJSService.voiceConnection.play(stream, {
 					volume: this.volume,
 				})
 			} else {
@@ -63,9 +66,18 @@ export default class MusicPlayerService {
 					volume: this.volume,
 				})
 			}
-			this.dispatcher.on('finish', () => (this.dispatcher = undefined))
-			this.dispatcher.on('close', () => (this.dispatcher = undefined))
-			this.dispatcher.on('error', () => (this.dispatcher = undefined))
+			this.dispatcher.on('finish', () => {
+				this.logger.info(`Finish to play ${ event.url } Volume: ${ this.volume }`)
+				this.dispatcher = undefined
+			})
+			this.dispatcher.on('close', () => {
+				this.logger.info(`Close dispatcher`)
+				this.dispatcher = undefined
+			})
+			this.dispatcher.on('error', (error) => {
+				this.logger.error(error)
+				this.dispatcher = undefined
+			})
 		}
 	}
 

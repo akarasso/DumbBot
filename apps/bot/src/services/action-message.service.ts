@@ -75,6 +75,7 @@ export default class ActionMessageService {
 		if (!actionName) {
 			return
 		}
+
 		this.proccessEvent(actionName, msg)
 	}
 }
