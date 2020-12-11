@@ -53,7 +53,7 @@ export default class MusicPlayerService {
 		}
 		await this.discordJSService.joinVoiceChannel(event.channel)
 		if (this.discordJSService.voiceConnection) {
-			if (/youtube/.test(event.url)) {
+			if (/youtube|youtu\.be/.test(event.url)) {
 				if (!ytdl.validateURL(event.url)) {
 					console.error('Failed to validate URL')
 				}
