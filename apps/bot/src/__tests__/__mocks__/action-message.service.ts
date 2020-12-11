@@ -22,7 +22,9 @@ export class MockActionMessageService implements ActionMessageService {
 		return Promise.resolve()
 	}
 
-	public registerActionMessage(_name: string, _actionService: IAction) {}
+	public registerActionMessage(name: string, actionService: IAction) {
+		this.actionsMessage[name] = actionService
+	}
 
 	public async proccessEvent(_actionName: string, _msg: Message) {
 		return Promise.resolve()
