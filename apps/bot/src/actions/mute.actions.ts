@@ -1,14 +1,32 @@
 import 'reflect-metadata'
 import { Message, TextChannel } from 'discord.js'
-import { inject, injectable } from 'inversify'
+import { injectable } from 'inversify'
 import { IAction } from './interfaces/actions'
 import ActionMessageService from '../services/action-message.service'
 import MuteService from '../services/mute.service'
 import { MuteEvent, ValuePerUnit } from './interfaces/events/mute'
 import DiscordJSService from '../services/discord.service'
+import { Right } from './interfaces/rights'
+import { MEMBERS } from '../contants/members'
+import { COMMANDS } from '../contants/commands'
 
 @injectable()
 export default class MuteAction implements IAction<MuteEvent> {
+
+	public name = COMMANDS.MUTE
+
+	public rights: Right = {
+		groups: false,
+		members: [
+			MEMBERS.MINIPOPOV,
+		],
+	}
+
+	public voteRights: Right = {
+		groups: true,
+		members: true,
+	}
+
 	private readonly reAction = /^([0-9]+)([msh]?)$/
 
 	private multTable: Record<string, ValuePerUnit> = {
@@ -18,11 +36,11 @@ export default class MuteAction implements IAction<MuteEvent> {
 	}
 
 	constructor(
-		@inject(ActionMessageService) private readonly actionService: ActionMessageService,
-		@inject(MuteService) private readonly muteService: MuteService,
-		@inject(DiscordJSService) private readonly discordService: DiscordJSService,
+		private readonly actionService: ActionMessageService,
+		private readonly muteService: MuteService,
+		private readonly discordService: DiscordJSService,
 	) {
-		this.actionService.registerActionMessage('mute', this)
+		this.actionService.registerActionMessage(this.name, this)
 	}
 
 	public format(msg: Message): MuteEvent {
@@ -56,7 +74,13 @@ export default class MuteAction implements IAction<MuteEvent> {
 	}
 
 	public doc() {
-		return ['!mute @<member> <time>', '!mute @Bdz 10', '!mute @Bdz 10s', '!mute @Bdz 10m', '!mute @Bdz 24h']
+		return [
+			`!${ this.name } @<member> <time>`,
+			`!${ this.name } @Bdz 10`,
+			`!${ this.name } @Bdz 10s`,
+			`!${ this.name } @Bdz 10m`,
+			`!${ this.name } @Bdz 24h`,
+		]
 	}
 
 	public help(channel: TextChannel) {

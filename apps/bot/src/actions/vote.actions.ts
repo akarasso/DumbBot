@@ -1,23 +1,43 @@
 import 'reflect-metadata'
 import { Message, MessageMentions, TextChannel } from 'discord.js'
-import { inject, injectable } from 'inversify'
+import { injectable } from 'inversify'
 import { IAction } from './interfaces/actions'
 import ActionMessageService from '../services/action-message.service'
 import VoteService from '../services/vote.service'
 import { VoteEvent } from './interfaces/events'
 import { Vote } from '../services/interfaces/vote'
+import { Right } from './interfaces/rights'
+import { COMMANDS } from '../contants/commands'
 
 @injectable()
 export default class VoteAction implements IAction<VoteEvent> {
+
+	public name = COMMANDS.VOTE
+
+	public rights: Right = {
+		groups: true,
+		members: true,
+	}
+
+	public voteRights: Right = {
+		groups: false,
+		members: false,
+	}
+
 	constructor(
-		@inject(ActionMessageService) private readonly actionService: ActionMessageService,
-		@inject(VoteService) private readonly voteService: VoteService,
+		public readonly actionService: ActionMessageService,
+		public readonly voteService: VoteService,
 	) {
-		this.actionService.registerActionMessage('vote', this)
+		this.actionService.registerActionMessage(this.name, this)
 	}
 
 	public doc() {
-		return ['!vote <action> <args...>', '!vote volume 2', '!vote mute 2', '!vote play ...']
+		return [
+			`!${ this.name } <action> <args...>`,
+			`!${ this.name } volume 2`,
+			`!${ this.name } mute 2`,
+			`!${ this.name } play ...`,
+		]
 	}
 
 	public help(channel: TextChannel) {
@@ -38,7 +58,7 @@ export default class VoteAction implements IAction<VoteEvent> {
 
 		msg.content = msg.content.split(' ').slice(1).join(' ')
 		const nextEventName = msg.content.split(' ')[0]
-		if (!this.actionService.actionsMessage[nextEventName]) {
+		if (!this.actionService.actionsMessage[nextEventName] || nextEventName === 'vote') {
 			throw new Error('Undefined action')
 		}
 		const targetID = this.getTarget(msg.mentions)
@@ -62,6 +82,7 @@ export default class VoteAction implements IAction<VoteEvent> {
 				this.actionService.proccessEvent(
 					event.nextEventName,
 					event.message,
+					true,
 				)
 			},
 		}

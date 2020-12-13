@@ -1,26 +1,46 @@
 import 'reflect-metadata'
 import { Message, TextChannel } from 'discord.js'
-import { inject, injectable } from 'inversify'
+import { injectable } from 'inversify'
 import { IAction } from './interfaces/actions'
 import ActionMessageService from '../services/action-message.service'
 import MusicPlayerService from '../services/music-player.service'
 import { PlayMusicEvent } from './interfaces/events'
 import DiscordJSService from '../services/discord.service'
+import { Right } from './interfaces/rights'
+import { GROUPS } from '../contants/groups'
+import { COMMANDS } from '../contants/commands'
 
 @injectable()
 export default class PlayMusicAction implements IAction<PlayMusicEvent[]> {
+
+	public name = COMMANDS.PLAY
+
+	public rights: Right = {
+		groups: [
+			GROUPS.ADMIN,
+			GROUPS.TITS,
+			GROUPS.MEMBERS,
+		],
+		members: false,
+	}
+
+	public voteRights: Right = {
+		groups: true,
+		members: true,
+	}
+
 	constructor(
-		@inject(ActionMessageService) private readonly actionService: ActionMessageService,
-		@inject(MusicPlayerService) private readonly musicPlayerService: MusicPlayerService,
-		@inject(DiscordJSService) private readonly discordService: DiscordJSService,
+		private readonly actionService: ActionMessageService,
+		private readonly musicPlayerService: MusicPlayerService,
+		private readonly discordService: DiscordJSService,
 	) {
-		this.actionService.registerActionMessage('play', this)
+		this.actionService.registerActionMessage(this.name, this)
 	}
 
 	public doc() {
 		return [
-			'!play http://url/file.mp3',
-			'!play https://cdn.discordapp.com/attachments/785220938102734898/785491052961595412/mpk49.mp3',
+			`!${ this.name } http://url/file.mp3`,
+			`!${ this.name } https://cdn.discordapp.com/attachments/785220938102734898/785491052961595412/mpk49.mp3`,
 		]
 	}
 

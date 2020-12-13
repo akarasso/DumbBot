@@ -11,7 +11,7 @@ export default class MusicPlayerService {
 	public logger: Logger
 	public queue: Array<{ channel: VoiceChannel; url: string }> = []
 
-	public volume: number = 0.5
+	public volume: number = 0.05
 
 	public dispatcher?: StreamDispatcher
 
@@ -57,7 +57,12 @@ export default class MusicPlayerService {
 				if (!ytdl.validateURL(event.url)) {
 					console.error('Failed to validate URL')
 				}
-				const stream = ytdl(event.url, { filter: format => format.container === 'mp4' })
+				const stream = ytdl(event.url, {
+					filter: format => {
+						return format.container === 'mp4'
+						 && format.audioQuality === 'AUDIO_QUALITY_MEDIUM'
+					},
+				})
 				this.dispatcher = this.discordJSService.voiceConnection.play(stream, {
 					volume: this.volume,
 				})
@@ -75,7 +80,8 @@ export default class MusicPlayerService {
 				this.dispatcher = undefined
 			})
 			this.dispatcher.on('error', (error) => {
-				this.logger.error(error)
+				console.error(error)
+				this.logger.error(error.message)
 				this.dispatcher = undefined
 			})
 		}

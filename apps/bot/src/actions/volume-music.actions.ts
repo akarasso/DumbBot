@@ -1,22 +1,46 @@
 import 'reflect-metadata'
 import { Message, TextChannel } from 'discord.js'
-import { inject, injectable } from 'inversify'
+import { injectable } from 'inversify'
 import { IAction } from './interfaces/actions'
 import ActionMessageService from '../services/action-message.service'
 import MusicPlayerService from '../services/music-player.service'
 import { VolumeMusicEvent } from './interfaces/events'
+import { Right } from './interfaces/rights'
+import { GROUPS } from '../contants/groups'
+import { COMMANDS } from '../contants/commands'
 
 @injectable()
 export default class VolumeMusicAction implements IAction<VolumeMusicEvent> {
+
+	public name = COMMANDS.VOLUME
+
+	public rights: Right = {
+		groups: [
+			GROUPS.ADMIN,
+			GROUPS.TITS,
+			GROUPS.MEMBERS,
+		],
+		members: false,
+	}
+
+	public voteRights: Right = {
+		groups: true,
+		members: true,
+	}
+
 	constructor(
-		@inject(ActionMessageService) private readonly actionService: ActionMessageService,
-		@inject(MusicPlayerService) private readonly musicPlayerService: MusicPlayerService,
+		private readonly actionService: ActionMessageService,
+		private readonly musicPlayerService: MusicPlayerService,
 	) {
-		this.actionService.registerActionMessage('volume', this)
+		this.actionService.registerActionMessage(this.name, this)
 	}
 
 	public doc() {
-		return ['!volume <0-2>', '!volume 0.1', '!volume 2']
+		return [
+			`!${ this.name } <0-2>`,
+			`!${ this.name } 0.1`,
+			`!${ this.name } 2`,
+		]
 	}
 
 	public help(channel: TextChannel) {

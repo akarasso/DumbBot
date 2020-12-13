@@ -6,11 +6,15 @@ import DiscordJSService from './discord.service'
 import { IAction } from '../actions/interfaces/actions'
 import { Message } from 'discord.js'
 import { CHANNELS } from '../contants/channels'
+import { Right } from '../actions/interfaces/rights'
 
 @injectable()
 export default class ActionMessageService {
+	
 	public actionsMessage: Record<string, IAction> = {}
 	public logger: Logger
+
+	public channelsWatched: Array<string>
 
 	constructor(
 		@inject(DiscordJSService) public discordJSService: DiscordJSService,
@@ -20,6 +24,13 @@ export default class ActionMessageService {
 		this.discordJSService.client.on('message', this.proccessMessage.bind(this))
 		if (process.env.ENV === 'prod') {
 			this.updateHelp()
+			this.channelsWatched = [
+				CHANNELS.BOT,
+			]
+		} else {
+			this.channelsWatched = [
+				CHANNELS.ADMIN_BOT,
+			]
 		}
 	}
 
@@ -50,11 +61,51 @@ export default class ActionMessageService {
 		this.actionsMessage[name] = actionService
 	}
 
-	public async proccessEvent(actionName: string, msg: Message) {
+	public checkRight(
+		right: Right,
+		msg: Message,
+	) {
+		let groupCheck
+		let userCheck
+
+		if (typeof right.groups === 'boolean') {
+			groupCheck = right.groups
+		} else {
+			for(const group in right.groups) {
+				if (msg.member?.roles.cache.has(group)) {
+					groupCheck = true
+					break
+				}
+			}
+			groupCheck = false
+		}
+
+		if (typeof right.members === 'boolean') {
+			userCheck = right.groups
+		} else {
+			// No need typeguard because any user can type..
+			userCheck = right.members.includes(msg.member?.id ?? '' as any)
+		}
+		return userCheck || groupCheck
+	}
+
+	public async proccessEvent(
+		actionName: string,
+		msg: Message,
+		isVoted = false,
+	) {
 		try {
-			if (this.actionsMessage[actionName]) {
-				const event = await this.actionsMessage[actionName].format(msg)
-				await this.actionsMessage[actionName].execute(event)
+			const action = this.actionsMessage[actionName]
+			if (action) {
+				const right = isVoted
+					? action.voteRights
+					: action.rights
+				if (this.checkRight(right, msg)) {
+					const event = await action.format(msg)
+					await action.execute(event)
+				} else {
+					msg.reply('You are not allowed to use with command. Try to use it by "!vote" command or contact a moderator')
+				}
 			}
 		} catch (err) {
 			this.logger.error('Failed to execute message', err)
@@ -65,6 +116,9 @@ export default class ActionMessageService {
 		const channel = msg.channel
 		const guild = msg.guild
 		if (!guild || channel.type !== 'text') {
+			return
+		}
+		if (!this.channelsWatched.includes(channel.id)) {
 			return
 		}
 		if (!msg.content.startsWith('!')) {

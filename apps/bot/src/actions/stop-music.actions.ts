@@ -1,22 +1,45 @@
 import 'reflect-metadata'
 import { Message, TextChannel } from 'discord.js'
-import { inject, injectable } from 'inversify'
+import { injectable } from 'inversify'
 import { IAction } from './interfaces/actions'
 import ActionMessageService from '../services/action-message.service'
 import MusicPlayerService from '../services/music-player.service'
 import { StopMusicEvent } from './interfaces/events'
+import { Right } from './interfaces/rights'
+import { GROUPS } from '../contants/groups'
+import { COMMANDS } from '../contants/commands'
 
 @injectable()
 export default class StopMusicAction implements IAction<StopMusicEvent> {
+
+	public name = COMMANDS.STOP
+
+	public rights: Right = {
+		groups: [
+			GROUPS.ADMIN,
+			GROUPS.TITS,
+			GROUPS.MEMBERS,
+		],
+		members: false,
+	}
+
+	public voteRights: Right = {
+		groups: true,
+		members: true,
+	}
+
 	constructor(
-		@inject(ActionMessageService) private readonly actionService: ActionMessageService,
-		@inject(MusicPlayerService) private readonly musicPlayerService: MusicPlayerService,
+		private readonly actionService: ActionMessageService,
+		private readonly musicPlayerService: MusicPlayerService,
 	) {
-		this.actionService.registerActionMessage('stop', this)
+		this.actionService.registerActionMessage(this.name, this)
 	}
 
 	public doc() {
-		return ['!stop', '!stop']
+		return [
+			`!${ this.name }`,
+			`!${ this.name }`,
+		]
 	}
 
 	public help(channel: TextChannel) {

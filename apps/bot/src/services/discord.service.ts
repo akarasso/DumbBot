@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import { inject, injectable } from 'inversify'
 import { Logger } from 'winston'
-import { Client, Guild, GuildChannel, VoiceChannel, VoiceConnection } from 'discord.js'
+import { Client, Guild, GuildChannel, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js'
 
 import LoggerService from './logger.service'
 import { GUILDS } from '../contants/guilds'
@@ -23,7 +23,6 @@ export default class DiscordJSService {
 				if (this.guild === undefined) {
 					rejects("unable to find 'La taverne'")
 				} else {
-					console.error('i m ready')
 					this.logger.info('Ready')
 					resolve(true)
 				}
@@ -54,8 +53,12 @@ export default class DiscordJSService {
 		return channel
 	}
 
-	public isVoiceChannel(channel: GuildChannel) {
+	public isVoiceChannel(channel: GuildChannel): channel is VoiceChannel {
 		return channel.isText() === false && channel.type === 'voice'
+	}
+
+	public isTextChannel(channel: GuildChannel): channel is TextChannel {
+		return channel.isText() && channel.type === 'text'
 	}
 
 	public async getVoiceChannel(id: string): Promise<VoiceChannel> {
@@ -65,5 +68,12 @@ export default class DiscordJSService {
 		}
 
 		return channel as VoiceChannel
+	}
+
+	public async send(id: string, content: string) {
+		const channel = await this.getChannel(id)
+		if (this.isTextChannel(channel)) {
+			channel.send(content)
+		}
 	}
 }

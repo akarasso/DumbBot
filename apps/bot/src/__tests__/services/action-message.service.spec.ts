@@ -8,7 +8,16 @@ describe('Action message service', () => {
         const container = buildContainer()
         container.rebind(DiscordJSService).to(MockDiscordJSService)
         const service: ActionMessageService = container.get(ActionMessageService)
-        service.registerActionMessage('jest_action2', {} as any)
+        service.registerActionMessage('jest_action2', {
+            rights: {
+                members: true,
+                groups: true,
+            },
+            voteRights: {
+                members: true,
+                groups: true,
+            }
+        } as any)
         expect(service.actionsMessage['jest_action2']).toBeDefined()
     })
 
@@ -18,7 +27,18 @@ describe('Action message service', () => {
         const service: ActionMessageService = container.get(ActionMessageService)
         const format = jest.fn((msg) => Promise.resolve(msg))
         const execute = jest.fn()
-        const newAction = { format, execute }
+        const newAction = {
+            format,
+            execute,
+            rights: {
+                members: true,
+                groups: true,
+            },
+            voteRights: {
+                members: true,
+                groups: true,
+            }
+        }
         const casesProccessEvent = [
             { name: 'test' },
             { name2: 'test2' },
@@ -59,8 +79,9 @@ describe('Action message service', () => {
             const container = buildContainer()
             container.rebind(DiscordJSService).to(MockDiscordJSService)
             const service: ActionMessageService = container.get(ActionMessageService)
+            service.channelsWatched = ['42']
             const goodCases = [
-                { guild: 'oui', channel: { type: 'text' }, content: '!action' },
+                { guild: 'oui', channel: { id: '42', type: 'text' }, content: '!action' },
             ]
             const mockProccessEvent = jest.fn()
             jest.spyOn(service, 'proccessEvent').mockImplementation(mockProccessEvent)

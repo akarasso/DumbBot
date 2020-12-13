@@ -27,6 +27,7 @@ describe('Vote action', () => {
 	describe('Format event', () => {
 		const channel = { id: '45', members: [], }
 		const voice = { channel, channelID: '45' }
+
 		describe('Throw cases', () => {
 			const throwCases = [
 				{},
@@ -44,11 +45,12 @@ describe('Vote action', () => {
 				}).rejects.toThrowError()
 			})
 		})
+
 		describe('Good cases', () => {
 			const goodCases = [
 				[
 					{
-						member: { voice }, content: 'vote vote abc',
+						member: { voice }, content: 'vote test abc',
 						mentions: {
 							everyone: false,
 							users: {
@@ -60,13 +62,14 @@ describe('Vote action', () => {
 						},
 					},
 					{
-						nextEventName: 'vote',
+						nextEventName: 'test',
 						voteNeeded: 0,
 						allowedMembersToVote: [],
 					}
 				]
 			]
 			test.each(goodCases)('Test %j', async (msg, expected: Record<string, any>) => {
+				action.actionService.actionsMessage['test'] = true as any
 				const res = action.format(msg as any)
 				for (const key in expected) {
 					expect(JSON.stringify((res as any)[key])).toBe(JSON.stringify(expected[key]))

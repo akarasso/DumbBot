@@ -1,4 +1,4 @@
-import { Client, Guild, GuildChannel, VoiceChannel, VoiceConnection } from 'discord.js'
+import { Client, Guild, GuildChannel, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import { Logger } from 'winston'
 import DiscordJSService from '../../services/discord.service'
@@ -27,11 +27,19 @@ export class MockDiscordJSService implements DiscordJSService {
 		return id as any
 	}
 
-	public isVoiceChannel(_channel: GuildChannel) {
-		return false
+	public isVoiceChannel(channel: GuildChannel): channel is VoiceChannel {
+		return !!channel
+	}
+
+	public isTextChannel(channel: GuildChannel): channel is TextChannel {
+		return !!channel
 	}
 
 	public async getVoiceChannel(id: string): Promise<VoiceChannel> {
 		return id as any
+	}
+
+	public async send(_id: string, _content: string) {
+		
 	}
 }

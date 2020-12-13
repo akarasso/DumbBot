@@ -8,11 +8,13 @@ import LoggerService from '../../services/logger.service'
 
 @injectable()
 export class MockActionMessageService implements ActionMessageService {
+
 	public actionsMessage: Record<string, IAction> = {}
 	public logger: Logger
+	public channelsWatched = []
 
 	constructor(
-		@inject(DiscordJSService) public discordJSService: DiscordJSService,
+		public discordJSService: DiscordJSService,
 		@inject(LoggerService) loggerService: LoggerService,
 	) {
 		this.logger = loggerService.get()
@@ -20,6 +22,10 @@ export class MockActionMessageService implements ActionMessageService {
 
 	public async updateHelp() {
 		return Promise.resolve()
+	}
+
+	public checkRight() {
+		return true
 	}
 
 	public registerActionMessage(name: string, actionService: IAction) {
