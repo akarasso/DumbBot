@@ -33,6 +33,7 @@ export default class DiscordJSService {
 
 	public async joinVoiceChannel(channel: VoiceChannel) {
 		this.voiceConnection = await channel.join()
+		this.logger.info(`Bot joined ${channel.name}`)
 	}
 
 	public async getMember(id: string) {

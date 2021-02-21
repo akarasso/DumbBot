@@ -9,22 +9,20 @@ import DiscordJSService from '../services/discord.service'
 import { Right } from './interfaces/rights'
 import { MEMBERS } from '../contants/members'
 import { COMMANDS } from '../contants/commands'
+import { GROUPS } from '../contants/groups'
 
 @injectable()
 export default class MuteAction implements IAction<MuteEvent> {
-
 	public name = COMMANDS.MUTE
 
 	public rights: Right = {
 		groups: false,
-		members: [
-			MEMBERS.MINIPOPOV,
-		],
+		members: [MEMBERS.MINIPOPOV],
 	}
 
 	public voteRights: Right = {
-		groups: true,
-		members: true,
+		groups: [GROUPS.MEMBERS, GROUPS.TITS, GROUPS.ADMIN],
+		members: false,
 	}
 
 	private readonly reAction = /^([0-9]+)([msh]?)$/
@@ -75,11 +73,11 @@ export default class MuteAction implements IAction<MuteEvent> {
 
 	public doc() {
 		return [
-			`!${ this.name } @<member> <time>`,
-			`!${ this.name } @Bdz 10`,
-			`!${ this.name } @Bdz 10s`,
-			`!${ this.name } @Bdz 10m`,
-			`!${ this.name } @Bdz 24h`,
+			`!${this.name} @<member> <time>`,
+			`!${this.name} @Bdz 10`,
+			`!${this.name} @Bdz 10s`,
+			`!${this.name} @Bdz 10m`,
+			`!${this.name} @Bdz 24h`,
 		]
 	}
 

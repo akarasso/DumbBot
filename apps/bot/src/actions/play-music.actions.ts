@@ -9,18 +9,14 @@ import DiscordJSService from '../services/discord.service'
 import { Right } from './interfaces/rights'
 import { GROUPS } from '../contants/groups'
 import { COMMANDS } from '../contants/commands'
+import LoggerService from '../services/logger.service'
 
 @injectable()
 export default class PlayMusicAction implements IAction<PlayMusicEvent[]> {
-
 	public name = COMMANDS.PLAY
 
 	public rights: Right = {
-		groups: [
-			GROUPS.ADMIN,
-			GROUPS.TITS,
-			GROUPS.MEMBERS,
-		],
+		groups: [GROUPS.ADMIN, GROUPS.TITS, GROUPS.MEMBERS],
 		members: false,
 	}
 
@@ -33,14 +29,15 @@ export default class PlayMusicAction implements IAction<PlayMusicEvent[]> {
 		private readonly actionService: ActionMessageService,
 		private readonly musicPlayerService: MusicPlayerService,
 		private readonly discordService: DiscordJSService,
+		private readonly loggerService: LoggerService,
 	) {
 		this.actionService.registerActionMessage(this.name, this)
 	}
 
 	public doc() {
 		return [
-			`!${ this.name } http://url/file.mp3`,
-			`!${ this.name } https://cdn.discordapp.com/attachments/785220938102734898/785491052961595412/mpk49.mp3`,
+			`!${this.name} http://url/file.mp3`,
+			`!${this.name} https://cdn.discordapp.com/attachments/785220938102734898/785491052961595412/mpk49.mp3`,
 		]
 	}
 
@@ -51,14 +48,17 @@ export default class PlayMusicAction implements IAction<PlayMusicEvent[]> {
 	public format(msg: Message): PlayMusicEvent[] {
 		const member = msg.member
 		if (!member) {
+			this.loggerService.logger.error('Failed to get member')
 			throw new Error('Failed to get member')
 		}
 		const channel = member.voice.channel
 		if (!channel) {
+			this.loggerService.logger.error('Member not connected')
 			throw new Error('Member not connected')
 		}
 		const args = msg.content.split(' ').slice(1)
 		if (!args.length) {
+			this.loggerService.logger.error('No url provided')
 			throw new Error('No url provided')
 		}
 		const events: PlayMusicEvent[] = []

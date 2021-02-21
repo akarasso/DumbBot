@@ -55,24 +55,15 @@ export default class MusicPlayerService {
 		if (this.discordJSService.voiceConnection) {
 			if (/youtube|youtu\.be/.test(event.url)) {
 				if (!ytdl.validateURL(event.url)) {
-					console.error('Failed to validate URL')
+					this.logger.error('YTDL:: Failed to validate URL')
 				}
-				const stream = ytdl(event.url, {
-					filter: format => {
-						return format.container === 'mp4'
-						 && format.audioQuality === 'AUDIO_QUALITY_MEDIUM'
-					},
-				})
-				this.dispatcher = this.discordJSService.voiceConnection.play(stream, {
-					volume: this.volume,
-				})
+				const stream = ytdl(event.url, { quality: 'highestaudio' })
+				this.dispatcher = this.discordJSService.voiceConnection.play(stream, { volume: this.volume })
 			} else {
-				this.dispatcher = this.discordJSService.voiceConnection.play(event.url, {
-					volume: this.volume,
-				})
+				this.dispatcher = this.discordJSService.voiceConnection.play(event.url, { volume: this.volume })
 			}
 			this.dispatcher.on('finish', () => {
-				this.logger.info(`Finish to play ${ event.url } Volume: ${ this.volume }`)
+				this.logger.info(`Finish to play ${event.url} Volume: ${this.volume}`)
 				this.dispatcher = undefined
 			})
 			this.dispatcher.on('close', () => {
@@ -80,7 +71,6 @@ export default class MusicPlayerService {
 				this.dispatcher = undefined
 			})
 			this.dispatcher.on('error', (error) => {
-				console.error(error)
 				this.logger.error(error.message)
 				this.dispatcher = undefined
 			})

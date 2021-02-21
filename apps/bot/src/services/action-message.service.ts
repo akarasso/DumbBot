@@ -10,7 +10,6 @@ import { Right } from '../actions/interfaces/rights'
 
 @injectable()
 export default class ActionMessageService {
-	
 	public actionsMessage: Record<string, IAction> = {}
 	public logger: Logger
 
@@ -24,13 +23,9 @@ export default class ActionMessageService {
 		this.discordJSService.client.on('message', this.proccessMessage.bind(this))
 		if (process.env.ENV === 'prod') {
 			this.updateHelp()
-			this.channelsWatched = [
-				CHANNELS.BOT,
-			]
+			this.channelsWatched = [CHANNELS.BOT]
 		} else {
-			this.channelsWatched = [
-				CHANNELS.ADMIN_BOT,
-			]
+			this.channelsWatched = [CHANNELS.ADMIN_BOT]
 		}
 	}
 
@@ -61,17 +56,14 @@ export default class ActionMessageService {
 		this.actionsMessage[name] = actionService
 	}
 
-	public checkRight(
-		right: Right,
-		msg: Message,
-	) {
+	public checkRight(right: Right, msg: Message) {
 		let groupCheck
 		let userCheck
 
 		if (typeof right.groups === 'boolean') {
 			groupCheck = right.groups
 		} else {
-			for(const group in right.groups) {
+			for (const group in right.groups) {
 				if (msg.member?.roles.cache.has(group)) {
 					groupCheck = true
 					break
@@ -84,28 +76,25 @@ export default class ActionMessageService {
 			userCheck = right.groups
 		} else {
 			// No need typeguard because any user can type..
-			userCheck = right.members.includes(msg.member?.id ?? '' as any)
+			userCheck = right.members.includes(msg.member?.id ?? ('' as any))
 		}
 		return userCheck || groupCheck
 	}
 
-	public async proccessEvent(
-		actionName: string,
-		msg: Message,
-		isVoted = false,
-	) {
+	public async proccessEvent(actionName: string, msg: Message, isVoted = false) {
 		try {
 			const action = this.actionsMessage[actionName]
 			if (action) {
-				const right = isVoted
-					? action.voteRights
-					: action.rights
+				const right = isVoted ? action.voteRights : action.rights
 				if (this.checkRight(right, msg)) {
+					this.logger.info(`Execute action ${actionName}`)
 					const event = await action.format(msg)
 					await action.execute(event)
 				} else {
 					msg.reply('You are not allowed to use with command. Try to use it by "!vote" command or contact a moderator')
 				}
+			} else {
+				this.logger.info(`No action named: ${actionName}`)
 			}
 		} catch (err) {
 			this.logger.error('Failed to execute message', err)
@@ -121,12 +110,14 @@ export default class ActionMessageService {
 		if (!this.channelsWatched.includes(channel.id)) {
 			return
 		}
+		this.logger.info(`Process event message ${msg.content}`)
 		if (!msg.content.startsWith('!')) {
 			return
 		}
 		const args = msg.content.split(' ')
 		const actionName = args.shift()?.slice(1)
 		if (!actionName) {
+			this.logger.info(`No action name found`)
 			return
 		}
 
